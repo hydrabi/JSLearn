@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+</head>
+
+<body>
+    <!-- javascript 伪协议 调用javaScript函数 -->
+    <a href="javascript:popUp('http://www.baidu.com/')">Example</a>
+
+    <!-- 内嵌的事件处理函数 -->
+    <!-- #符号是一个仅供文档内部使用的链接记号 只是为了创建一个空连接 实际工作全部由onclick属性负责完成 -->
+    <a href="#" onclick="popUp('http://www.baidu.com/');return false">Example</a>
+    <!-- 平稳退化 -->
+    <!-- this可以用来代表任何一种当前元素，所以可以用this和getAttribute方法提取出href属性的值 -->
+    <a href="http://www.baidu.com/" onclick="popUp(this.getAttribute('href'));return false;">Example</a>
+    <script src="common.js"></script>
+</body>
+
+</html>
