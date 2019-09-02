@@ -11,12 +11,44 @@
 
 <body>
     <h1 id="h01"></h1>
+    <button id="btn">效果</button>
+    <h2 class="test1">基于元素名选取元素 点击按钮隐藏</h2>
+    <p>基于元素名选取元素 点击按钮隐藏</p>
+
 
     <script>
         function myFunction() {
+            //直接用字符串 基于元素名选取元素
+            $("#btn").click(function() {
+                $("p").hide();
+                //通过指定的class查找元素
+                $(".test1").hide();
+            });
+            //通过#id 通过id属性选取指定的元素
             $("#h01").attr("style", "color:red").html("hello jquery")
+
+            //事件click
+            $("p").click(function() {
+                $(this).hide();
+            });
+
+            //双击dblclick
+            $("p").dblclick(function() {
+
+            });
+
+            //鼠标指针穿过元素时
+            $("p").mouseenter(function() {
+
+            });
+
+            //鼠标指针穿过元素时
+            $("p").mouseleave(function() {
+
+            });
+
         }
-        $(document).ready(myFunction)
+        $(document).ready(myFunction);
     </script>
 </body>
 
