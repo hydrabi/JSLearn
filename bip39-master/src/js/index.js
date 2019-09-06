@@ -475,6 +475,7 @@
     function calcBip32RootKeyFromSeed(phrase, passphrase) {
         seed = mnemonic.toSeed(phrase, passphrase);
         bip32RootKey = bitcoinjs.bitcoin.HDNode.fromSeedHex(seed, network);
+        console.log(bip32RootKey);
     }
 
     function calcBip32RootKeyFromBase58(rootKeyBase58) {

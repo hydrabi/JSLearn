@@ -14,7 +14,11 @@
     <button id="btn">效果</button>
     <h2 class="test1">基于元素名选取元素 点击按钮隐藏</h2>
     <p>基于元素名选取元素 点击按钮隐藏</p>
-
+    <p id="test1">test1</p>
+    <p id="test2">test2</p>
+    <button id="btn1">btn1</button>
+    <button id="btn2">btn2</button>
+    <a href="" id="link"></a>
 
     <script>
         function myFunction() {
@@ -44,6 +48,23 @@
 
             //鼠标指针穿过元素时
             $("p").mouseleave(function() {
+
+            });
+
+            $("btn1").click(function() {
+                $("#test1").text(function(i, originText) {
+                    return "旧文本: " + origText + " 新文本: Hello world! (index: " + i + ")";
+                });
+
+                $("link").attr({
+                    "href": "http:www.baidu.com",
+                    "title": "lianjie"
+                });
+
+                $("link").attr("href", function(i, originValue) {
+                    return originValue + "/jquery";
+                });
+
 
             });
 
