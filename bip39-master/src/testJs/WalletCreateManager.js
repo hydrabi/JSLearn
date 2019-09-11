@@ -3,11 +3,13 @@ var WalletCreateManager = function() {
 
     //创建枚举
     var coinTypeEnum = {
+        "BCH - Bitcoin Cash": 7,
         "BTC - Bitcoin": 17,
         "BTC - Bitcoin Testnet": 18,
+        "EOS - EOSIO": 53,
         "ETH - Ethereum": 56,
         "LTC - Litecoin": 83,
-        "XRP - Ripple": 158
+        "XRP - Ripple": 158,
     }
 
     //助记词数量
@@ -320,12 +322,7 @@ var WalletCreateManager = function() {
             }
             // Bitcoin Cash address format may vary
             if (coinType == "BCH - Bitcoin Cash") {
-                var bchAddrType = DOM.bitcoinCashAddressType.filter(":checked").val();
-                if (bchAddrType == "cashaddr") {
-                    address = bchaddr.toCashAddress(address);
-                } else if (bchAddrType == "bitpay") {
-                    address = bchaddr.toBitpayAddress(address);
-                }
+                address = bchaddr.toBitpayAddress(address);
             }
             // Bitcoin Cash address format may vary
             if (coinType == "SLP - Simple Ledger Protocol") {
@@ -490,7 +487,6 @@ var WalletCreateManager = function() {
         {
             name: "BCH - Bitcoin Cash",
             onSelect: function() {
-                DOM.bitcoinCashAddressTypeContainer.removeClass("hidden");
                 setHdCoin(145);
             },
         },

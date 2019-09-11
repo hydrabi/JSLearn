@@ -51,15 +51,17 @@
     <script src="js/ripple-1.3.2-min.js"></script>
     <script src="testJs/rippleManager.js"></script>
     <script>
+        // "BCH - Bitcoin Cash":7,
         // "BTC - Bitcoin": 17,
         // "BTC - Bitcoin Testnet": 18,
+        // "EOS - EOSIO": 53 ,
         // "ETH - Ethereum": 56,
         // "LTC - Litecoin": 83,
-        // "XRP - Ripple": 158
+        // "XRP - Ripple": 158,
         function generateClicked() {
             var manager = new WalletCreateManager();
             var words = manager.generate();
-            manager.address(words, "", "XRP - Ripple");
+            manager.address("under syrup oak method must enrich buyer sister cherry rural obvious kit", "", "BCH - Bitcoin Cash");
         }
 
         function rippleTest() {
