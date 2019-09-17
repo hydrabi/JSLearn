@@ -78,17 +78,6 @@ var rippleManager = function() {
         //     }
         // });
 
-        //检查交易事务的状态
-        try {
-            var tx = await api.getTransaction(txID, {
-                minLedgerVersion: earliestLedgerVersion
-            });
-            console.log("Transaction result:", tx.outcome.result);
-            console.log("Balance changes:", JSON.stringify(tx.outcome.balanceChanges));
-        } catch (error) {
-            console.log("Couldn't get transaction outcome:", error);
-        }
-
         console.log("Prepared transaction instructions:", preparedTx.txJSON);
         console.log("Transaction cost:", preparedTx.instructions.fee, "XRP");
         console.log("Transaction expires after ledger:", preparedTx.instructions.maxLedgerVersion);
@@ -96,6 +85,20 @@ var rippleManager = function() {
         console.log("Signed blob:", txBlob);
         console.log("Tentative result code:", result.resultCode);
         console.log("Tentative result message:", result.resultMessage);
+
+        //检查交易事务的状态
+        try {
+            var tx = await api.getTransaction(txID, {
+                minLedgerVersion: earliestLedgerVersion
+            });
+            console.log("Transaction result:", tx.outcome.result);
+            console.log("Balance changes:", JSON.stringify(tx.outcome.balanceChanges));
+
+            return { "result": true, "object": tx }
+        } catch (error) {
+            console.log("Couldn't get transaction outcome:", error);
+            return { "result": false, "object": error }
+        }
 
     }
 
@@ -111,6 +114,7 @@ var rippleManager = function() {
         await api.connect();
         const result = await api.getTransactions(requestAddress)
         console.log("交易历史 " + JSON.stringify(result))
+        return result
     }
 
 }
