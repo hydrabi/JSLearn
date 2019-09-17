@@ -31,9 +31,9 @@ setupWebViewJavascriptBridge(function(bridge) {
         var manager = new WalletCreateManager();
         var words = manager.generate();
         responseCallback(words)
-    })
+    });
 
-    // 
+    // 获取地址 公钥 私钥
     bridge.registerHandler('getAddress', function(data, responseCallback) {
         log("创建账户的参数是: ", data)
         var words = data.words
@@ -42,5 +42,41 @@ setupWebViewJavascriptBridge(function(bridge) {
 
         var manager = new WalletCreateManager();
         responseCallback(manager.address(words, pass, coinType));
-    })
+    });
+
+    // 获取瑞波的矿工费
+    bridge.registerHandler('getRippleFee', function(data, responseCallback) {
+        var manager = new rippleManager();
+        var fee = manager.getFee();
+        responseCallback(fee);
+    });
+
+    // 获取瑞波的账户信息
+    bridge.registerHandler('getRippleAccountInfo', function(data, responseCallback) {
+        var address = data.address;
+        var manager = new rippleManager();
+        var accountInfo = manager.getAccountInfo(address);
+        responseCallback(accountInfo);
+    });
+
+    // 瑞波的交易 fromAddress, toAddress, fee, amount 返回 {"result":true,"object":tx}
+    bridge.registerHandler('rippleTranscation', function(data, responseCallback) {
+        var fromAddress = data.fromAddress;
+        var toAddress = data.toAddress;
+        var fee = data.fee;
+        var amount = data.amount;
+
+        var manager = new rippleManager();
+        var resultObj = manager.requestTransaction(fromAddress, toAddress, fee, amount);
+        responseCallback(resultObj);
+    });
+
+    // 瑞波的交易记录
+    bridge.registerHandler('getRippleTrans', function(data, responseCallback) {
+        var address = data.address;
+
+        var manager = new rippleManager();
+        var resultObj = manager.getTrans(address);
+        responseCallback(resultObj);
+    });
 })

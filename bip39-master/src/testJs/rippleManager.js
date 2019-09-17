@@ -21,6 +21,7 @@ var rippleManager = function() {
 
         const info = await api.getAccountInfo(address);
         console.log(address + "的信息是 " + JSON.stringify(info));
+        return info
     }
 
     //获取最低矿工费用
@@ -29,6 +30,7 @@ var rippleManager = function() {
 
         const fee = await api.getFee();
         console.log("费用是 " + fee);
+        return fee
     }
 
     //转账
@@ -103,6 +105,12 @@ var rippleManager = function() {
             console.log("ledger.ledgerVersion ", ledger.ledgerVersion);
             return ledger.ledgerVersion + 4;
         }).catch(err => console.error(err));
+    }
+
+    this.getTrans = async function getTrans(requestAddress) {
+        await api.connect();
+        const result = await api.getTransactions(requestAddress)
+        console.log("交易历史 " + JSON.stringify(result))
     }
 
 }
