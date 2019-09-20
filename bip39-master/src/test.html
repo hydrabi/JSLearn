@@ -11,6 +11,7 @@
 <body>
     <button id="button">Generate</button>
     <button id="ripple">Ripple</button>
+    <button id="bitCore">BitCore</button>
 
     <script src="js/polyfill.es6.js"></script>
     <script src="js/basex.js"></script>
@@ -50,6 +51,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.js"></script>
     <script src="js/ripple-1.3.2-min.js"></script>
     <script src="testJs/rippleManager.js"></script>
+    <script src="testJs/bitcore-lib.min.js"></script>
     <script>
         // "BCH - Bitcoin Cash":7,
         // "BTC - Bitcoin": 17,
@@ -72,6 +74,15 @@
             // manager.requestTransaction("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "0.000013", "1");
         }
 
+        function bitCoreTest() {
+            debugger
+            var bitcore = require('bitcore-lib');
+            var privateKey = new bitcore.PrivateKey();
+            var address = privateKey.toAddress();
+            // var address = bitcore.Address("regular roast attract ice owner beyond sustain tortoise subway wear blade ski", 'testnet').toString();
+            console.log(bitcore);
+        }
+
         function createWallet(params) {
             var manager = new WalletCreateManager();
             var words = manager.generate();
@@ -90,6 +101,7 @@
 
         $("#button").on("click", generateClicked);
         $("#ripple").on("click", rippleTest);
+        $("#bitCore").on("click", bitCoreTest);
     </script>
 </body>
 
