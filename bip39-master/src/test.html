@@ -68,7 +68,9 @@
 
         function rippleTest() {
             var manager = new rippleManager();
-            // manager.getFee();
+            manager.getFee().then(fee => {
+                console.log(fee);
+            });
             // manager.getAccountInfo("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx");
             manager.getTrans("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx");
             // manager.requestTransaction("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "0.000013", "1");

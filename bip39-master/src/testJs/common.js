@@ -47,16 +47,20 @@ setupWebViewJavascriptBridge(function(bridge) {
     // 获取瑞波的矿工费
     bridge.registerHandler('getRippleFee', function(data, responseCallback) {
         var manager = new rippleManager();
-        var fee = manager.getFee();
-        responseCallback(fee);
+        manager.getFee().then(fee => {
+            responseCallback(fee);
+        });
+
     });
 
     // 获取瑞波的账户信息
     bridge.registerHandler('getRippleAccountInfo', function(data, responseCallback) {
         var address = data.address;
         var manager = new rippleManager();
-        var accountInfo = manager.getAccountInfo(address);
-        responseCallback(accountInfo);
+        manager.getAccountInfo(address).then(accountInfo => {
+            responseCallback(accountInfo);
+        });
+
     });
 
     // 瑞波的交易 fromAddress, toAddress, fee, amount 返回 {"result":true,"object":tx}
@@ -67,8 +71,9 @@ setupWebViewJavascriptBridge(function(bridge) {
         var amount = data.amount;
 
         var manager = new rippleManager();
-        var resultObj = manager.requestTransaction(fromAddress, toAddress, fee, amount);
-        responseCallback(resultObj);
+        manager.requestTransaction(fromAddress, toAddress, fee, amount).then(resultObj => {
+            responseCallback(resultObj);
+        });
     });
 
     // 瑞波的交易记录
@@ -76,7 +81,9 @@ setupWebViewJavascriptBridge(function(bridge) {
         var address = data.address;
 
         var manager = new rippleManager();
-        var resultObj = manager.getTrans(address);
-        responseCallback(resultObj);
+        manager.getTrans(address).then(resultObj => {
+            responseCallback(resultObj);
+        });
+
     });
 })
