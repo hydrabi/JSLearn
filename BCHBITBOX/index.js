@@ -73,94 +73,167 @@ var getPrivateKey = function(mne) {
     console.log("success 私钥为：" + JSON.stringify(keyPair));
 }
 
-function trans() {
+// 排序utxo数组
+function sortUTXO(utxo) {
+    if (Array.isArray(utxo)) {
+        if (utxo.length > 0) {
+            function compare(amount) {
+                return function(a, b) {
+                    var amount1 = a[amount];
+                    var amount2 = b[amount];
+                    return amount1 - amount2;
+                }
+            }
+
+            return utxo.sort(compare("amount"));
+        }
+    }
+
+    return null;
+}
+
+function resultConfig(result, object, err) {
+    return {
+        "result": result,
+        "object": object,
+        "err": err
+    };
+}
+
+async function trans(sendAddress, sendMne, sendAmount, toAddress, minerFee) {
     console.log("start trans");
 
-    //写死
-    let vout = 1;
-    //输入
-    let txid = "55039017223da27f37444c2f80187c0a29152c59a3501bf1d3b66cca9ff1ca03";
-    //要发送的金额
-    const amountToSend = 0.0001;
-    //未花费账单金额
-    const utxoAmount = 0.00979132;
-    //发送地址
-    const fromAddress = testAddress2;
-    //发送地址助记词
-    const fromAddressMne = testAddress2Mne;
-    //接收地址
-    const toAddress = testAddress1;
-
     //未花费账单的余额（应该用未消费账单的每一笔加起来 现在暂时写死）
-    const balanceSatoshis = bitbox.BitcoinCash.toSatoshi(utxoAmount);
-    console.log("未花费金额为:" + balanceSatoshis);
-    //矿工费计算
+    // const balanceSatoshis = bitbox.BitcoinCash.toSatoshi(utxoAmount);
+    // console.log("未花费金额为:" + balanceSatoshis);
+    //矿工费计算 一般为两笔输出 所以 getByteCount 第二个参数为2
     let byteCount = bitbox.BitcoinCash.getByteCount({ P2PKH: 1 }, { P2PKH: 2 });
     console.log("矿工费:" + byteCount);
+    //最大矿工费
+    let maxByteCount = 384;
     //要发送的金额 转成聪
-    const amountSatoshis = bitbox.BitcoinCash.toSatoshi(amountToSend);
-    console.log("发送金额为:" + amountSatoshis);
+    const sendAmountSatoshis = bitbox.BitcoinCash.toSatoshi(sendAmount);
+    console.log("发送金额为:" + sendAmountSatoshis);
     //找零
-    const changeAmount = balanceSatoshis - byteCount - amountSatoshis;
-    console.log("找零:" + changeAmount);
+    // const changeAmount = balanceSatoshis - byteCount - amountSatoshis;
+    // console.log("找零:" + changeAmount);
     //写死测试地址
     const network = 'testnet';
 
 
+    let utxos;
+    try {
+        utxos = await bitbox.Address.utxo(sendAddress);
+        console.log("success uxto为：" + JSON.stringify(utxos));
+    } catch (err) {
+        //请求失败
+        console.log(err);
+        return resultConfig(false, null, err);
+    }
 
-    // //找零
-    // const change = balanceSatoshis - feeSatoshis - amountSatoshis;
+    //已经排序的数组
+    let sortUTXOList = sortUTXO(utxos["utxos"]);
+    if (sortUTXOList.length == 0) {
+        return resultConfig(false, null, "无交易记录");
+    }
+    console.log("已经排序的数组：" + JSON.stringify(sortUTXOList));
 
-    let seedBuffer = bitbox.Mnemonic.toSeed(fromAddressMne);
-    // create HDNode from seed buffer
-    let hdnode = bitbox.HDNode.fromSeed(seedBuffer, network);
-    //Next create a BIP44 account. The 2nd argument is the BIP44 HD path.
-    let account = bitbox.HDNode.derivePath(hdnode, "m/44'/145'/0'");
-    // derive the first external change address HDNode which is going to spend utxo
-    let change = bitbox.HDNode.derivePath(account, '0/0');
-    // get the cash address
-    let cashAddress = bitbox.HDNode.toCashAddress(change);
-    console.log("得到的找零地址:" + cashAddress);
+    //需要使用的队列
+    let unSpentArr = Array();
+    //除去utxo每一笔后剩余的值 用以判断utxo总值是否足够转账
+    let leftAmount = sendAmountSatoshis + maxByteCount;
+    console.log("leftAmount = " + leftAmount);
+    //遍历已排序的数组 将遍历到每一笔账单的值加起来 直到超过或者等于要发送的值为止
 
-
-    let transactionBuilder = new bitbox.TransactionBuilder(network);
-    transactionBuilder.addInput(
-        txid,
-        vout
-    );
-
-    transactionBuilder.addOutput(
-        toAddress,
-        amountSatoshis
-    );
-
-    transactionBuilder.addOutput(
-        fromAddress,
-        balanceSatoshis - byteCount - amountSatoshis
-    );
-
-    let keyPair = bitbox.HDNode.toKeyPair(change);
-    let redeemScript;
-    transactionBuilder.sign(
-        0,
-        keyPair,
-        redeemScript,
-        transactionBuilder.hashTypes.SIGHASH_ALL,
-        balanceSatoshis
-    );
-    // build tx
-    let tx = transactionBuilder.build();
-    // output rawhex
-    let hex = tx.toHex();
-    console.log("tx hex is " + hex);
-    bitbox.RawTransactions.sendRawTransaction(hex).then(
-        result => {
-            console.log("交易结果为：" + result);
-        },
-        err => {
-            console.log(err)
+    for (let i = 0; i < sortUTXOList.length; i++) {
+        let utxo = sortUTXOList[i];
+        let amount = utxo["satoshis"];
+        unSpentArr.push(utxo);
+        leftAmount -= amount;
+        console.log("当前leftAmount：" + leftAmount);
+        if (leftAmount <= 0) {
+            break;
         }
-    )
+    }
+
+    if (leftAmount > 0) {
+        return resultConfig(false, null, "余额不足以转账");
+    }
+
+    console.log("选择用以转账的账单：" + JSON.stringify(unSpentArr));
+
+    // //写死
+    // let vout = 1;
+    // //输入
+    // let txid = "55039017223da27f37444c2f80187c0a29152c59a3501bf1d3b66cca9ff1ca03";
+    // //要发送的金额
+    // const amountToSend = 0.0001;
+    // //未花费账单金额
+    // const utxoAmount = 0.00979132;
+    // //发送地址
+    // const fromAddress = testAddress2;
+    // //发送地址助记词
+    // const fromAddressMne = testAddress2Mne;
+    // //接收地址
+    // const toAddress = testAddress1;
+
+
+
+
+
+    // // //找零
+    // // const change = balanceSatoshis - feeSatoshis - amountSatoshis;
+
+    // let seedBuffer = bitbox.Mnemonic.toSeed(fromAddressMne);
+    // // create HDNode from seed buffer
+    // let hdnode = bitbox.HDNode.fromSeed(seedBuffer, network);
+    // //Next create a BIP44 account. The 2nd argument is the BIP44 HD path.
+    // let account = bitbox.HDNode.derivePath(hdnode, "m/44'/145'/0'");
+    // // derive the first external change address HDNode which is going to spend utxo
+    // let change = bitbox.HDNode.derivePath(account, '0/0');
+    // // get the cash address
+    // let cashAddress = bitbox.HDNode.toCashAddress(change);
+    // console.log("得到的找零地址:" + cashAddress);
+
+
+    // let transactionBuilder = new bitbox.TransactionBuilder(network);
+    // transactionBuilder.addInput(
+    //     txid,
+    //     vout
+    // );
+
+    // transactionBuilder.addOutput(
+    //     toAddress,
+    //     amountSatoshis
+    // );
+
+    // transactionBuilder.addOutput(
+    //     fromAddress,
+    //     balanceSatoshis - byteCount - amountSatoshis
+    // );
+
+    // let keyPair = bitbox.HDNode.toKeyPair(change);
+    // let redeemScript;
+    // transactionBuilder.sign(
+    //     0,
+    //     keyPair,
+    //     redeemScript,
+    //     transactionBuilder.hashTypes.SIGHASH_ALL,
+    //     balanceSatoshis
+    // );
+    // // build tx
+    // let tx = transactionBuilder.build();
+    // // output rawhex
+    // let hex = tx.toHex();
+    // console.log("tx hex is " + hex);
+    // bitbox.RawTransactions.sendRawTransaction(hex).then(
+    //     result => {
+    //         console.log("交易结果为：" + result);
+    //     },
+    //     err => {
+    //         console.log(err)
+    //     }
+    // )
 }
 
 //确认能成功地 不能碰
@@ -229,12 +302,12 @@ function trans() {
 //     }
 // });
 
-getUnSpent(testAddress2).then(object => {
-    var result = object["result"]
-    if (result) {
-        console.log("success uxto为：" + JSON.stringify(object["object"]));
-    }
-});
+// getUnSpent(testAddress2).then(object => {
+//     var result = object["result"]
+//     if (result) {
+//         console.log("success uxto为：" + JSON.stringify(object["object"]));
+//     }
+// });
 
 // getTransaction(testAddress1).then(object => {
 //     var result = object["result"]
@@ -245,4 +318,6 @@ getUnSpent(testAddress2).then(object => {
 
 // getPrivateKey("wave because fence town word april ramp enable doctor siege good pull");
 
-trans();
+trans(testAddress2, testAddress2Mne, 0.0001, testAddress1, 0).then({
+
+});
