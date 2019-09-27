@@ -47,8 +47,8 @@ setupWebViewJavascriptBridge(function(bridge) {
     // 获取瑞波的矿工费
     bridge.registerHandler('getRippleFee', function(data, responseCallback) {
         var manager = new rippleManager();
-        manager.getFee().then(fee => {
-            responseCallback(fee);
+        manager.getFee().then(resultObj => {
+            responseCallback(resultObj);
         });
 
     });
@@ -57,21 +57,23 @@ setupWebViewJavascriptBridge(function(bridge) {
     bridge.registerHandler('getRippleAccountInfo', function(data, responseCallback) {
         var address = data.address;
         var manager = new rippleManager();
-        manager.getAccountInfo(address).then(accountInfo => {
-            responseCallback(accountInfo);
+        manager.getAccountInfo(address).then(resultObj => {
+            responseCallback(resultObj);
         });
 
     });
 
-    // 瑞波的交易 fromAddress, toAddress, fee, amount 返回 {"result":true,"object":tx}
+    // 瑞波的交易 fromAddress, toAddress, fee, amount,secret 返回 {"result":true,"object":tx}
     bridge.registerHandler('rippleTranscation', function(data, responseCallback) {
         var fromAddress = data.fromAddress;
         var toAddress = data.toAddress;
         var fee = data.fee;
         var amount = data.amount;
+        var secret = data.secret;
+        var tag = data.tag;
 
         var manager = new rippleManager();
-        manager.requestTransaction(fromAddress, toAddress, fee, amount).then(resultObj => {
+        manager.requestTransaction(fromAddress, toAddress, fee, amount, secret, tag).then(resultObj => {
             responseCallback(resultObj);
         });
     });
@@ -86,4 +88,36 @@ setupWebViewJavascriptBridge(function(bridge) {
         });
 
     });
+
+    // 瑞波的交易地址是否正确
+    bridge.registerHandler('isRippleValidAddress', function(data, responseCallback) {
+        var address = data.address;
+
+        var manager = new rippleManager();
+        manager.isValidAddress(address).then(resultObj => {
+            responseCallback(resultObj);
+        });
+
+    });
+
+    // 根据txid获取单个瑞波交易详情
+    bridge.registerHandler('getSepecificTransaction', function(data, responseCallback) {
+        var txid = data.txid;
+
+        var manager = new rippleManager();
+        manager.getSepecificTransaction(txid).then(resultObj => {
+            responseCallback(resultObj);
+        });
+    });
+
+    // 瑞波设置是否为生产环境 
+    bridge.registerHandler('setNetworkIsMainNet', function(data, responseCallback) {
+        var isMainNet = data.isMainNet;
+
+        var manager = new rippleManager();
+        manager.setNetworkIsMainNet(isMainNet).then(resultObj => {
+            responseCallback(resultObj);
+        });
+    });
+
 })

@@ -15,26 +15,60 @@ var rippleManager = function() {
     //默认矿工费用
     var difaultFee = "0.000013";
 
+    //配置结果
+    function resultConfig(result, object, err) {
+        return {
+            "result": result,
+            "object": object,
+            "err": err
+        };
+    }
+
+    this.setNetworkIsMainNet = function(isMainNet) {
+        if (isMainNet) {
+            api = new ripple.RippleAPI({
+                //正式链
+                server: 'wss://s1.ripple.com/'
+            });
+        } else {
+            api = new ripple.RippleAPI({
+                // server: 'wss://s1.ripple.com/'
+                //测试链
+                server: 'wss://s.altnet.rippletest.net:51233'
+            });
+        }
+        return resultConfig(true, "设置成功", "");
+    }
+
     // 获取用户信息
     this.getAccountInfo = async function accountInfo(address) {
-        await api.connect();
-
-        const info = await api.getAccountInfo(address);
-        console.log(address + "的信息是 " + JSON.stringify(info));
-        return info
+        try {
+            await api.connect();
+            const info = await api.getAccountInfo(address);
+            console.log(address + "的信息是 " + JSON.stringify(info));
+            return resultConfig(true, info, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
     }
 
     //获取最低矿工费用
     this.getFee = async function getFee() {
-        await api.connect();
+        try {
+            await api.connect();
 
-        const fee = await api.getFee();
-        console.log("费用是 " + fee);
-        return fee
+            const fee = await api.getFee();
+            console.log("费用是 " + fee);
+            return resultConfig(true, fee, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
     }
 
     //转账
-    this.requestTransaction = async function requestTransaction(fromAddress, toAddress, fee, amount) {
+    this.requestTransaction = async function requestTransaction(fromAddress, toAddress, fee, amount, secret, tag = 0) {
 
         await api.connect();
         const ledger = await api.getLedger();
@@ -46,11 +80,12 @@ var rippleManager = function() {
             "Account": fromAddress,
             "Amount": api.xrpToDrops(amount), // Same as "Amount": "22000000"
             "Destination": toAddress,
-            "LastLedgerSequence": lastLedgerSequence
+            "LastLedgerSequence": lastLedgerSequence,
+            "SourceTag": parseInt(tag)
         };
 
         const instructions = {
-            "fee": fee
+            "fee": fee,
         };
 
         //准备transcation
@@ -59,16 +94,21 @@ var rippleManager = function() {
         const maxLedgerVersion = preparedTx.instructions.maxLedgerVersion
         const txJson = preparedTx.txJSON;
         //获取签名
-        const response = api.sign(txJson, address1Secret);
+        const response = api.sign(txJson, secret);
         //最后交易的签名
         const txBlob = response.signedTransaction;
         //交易id
         const txID = response.id;
-        //最后的总账版本号
-        const latestLedgerVersion = await api.getLedgerVersion();
+
         //提交的结果
-        const result = await api.submit(txBlob);
-        const earliestLedgerVersion = latestLedgerVersion + 1;
+        try {
+            const result = await api.submit(txBlob);
+            return resultConfig(true, txID, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
+
 
         //确认最新的有效版本号
         // api.on('ledger', ledger => {
@@ -78,30 +118,15 @@ var rippleManager = function() {
         //     }
         // });
 
-        console.log("Prepared transaction instructions:", preparedTx.txJSON);
-        console.log("Transaction cost:", preparedTx.instructions.fee, "XRP");
-        console.log("Transaction expires after ledger:", preparedTx.instructions.maxLedgerVersion);
-        console.log("Identifying hash:", response.id);
-        console.log("Signed blob:", txBlob);
-        console.log("Tentative result code:", result.resultCode);
-        console.log("Tentative result message:", result.resultMessage);
-
-        //检查交易事务的状态
-        try {
-            var tx = await api.getTransaction(txID, {
-                minLedgerVersion: earliestLedgerVersion
-            });
-            console.log("Transaction result:", tx.outcome.result);
-            console.log("Balance changes:", JSON.stringify(tx.outcome.balanceChanges));
-
-            return { "result": true, "object": tx }
-        } catch (error) {
-            console.log("Couldn't get transaction outcome:", error);
-            return { "result": false, "object": error }
-        }
+        // console.log("Prepared transaction instructions:", preparedTx.txJSON);
+        // console.log("Transaction cost:", preparedTx.instructions.fee, "XRP");
+        // console.log("Transaction expires after ledger:", preparedTx.instructions.maxLedgerVersion);
+        // console.log("Identifying hash:", response.id);
+        // console.log("Signed blob:", txBlob);
+        // console.log("Tentative result code:", result.resultCode);
+        // console.log("Tentative result message:", result.resultMessage);
 
     }
-
 
     function getMaxLedgerVersion() {
         return api.getLedger().then(ledger => {
@@ -110,11 +135,46 @@ var rippleManager = function() {
         }).catch(err => console.error(err));
     }
 
+    //获取交易记录
     this.getTrans = async function getTrans(requestAddress) {
-        await api.connect();
-        const result = await api.getTransactions(requestAddress)
-        console.log("交易历史 " + JSON.stringify(result))
-        return result
+        try {
+            await api.connect();
+            const result = await api.getTransactions(requestAddress)
+            console.log("交易历史 " + JSON.stringify(result))
+            return resultConfig(true, result, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
     }
 
+    //获取单个交易记录
+    this.getSepecificTransaction = async function getSepecificTransaction(txID) {
+        await api.connect();
+        //最后的总账版本号
+        const latestLedgerVersion = await api.getLedgerVersion();
+        const earliestLedgerVersion = latestLedgerVersion + 1;
+        //检查交易事务的状态
+        try {
+            var tx = await api.getTransaction(txID);
+
+            return resultConfig(true, tx, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
+    }
+
+    //判断地址是否正确
+    this.isValidAddress = async function isValidAddress(address) {
+        await api.connect();
+        try {
+            let result = await api.isValidAddress(address);
+            console.log("地址验证结果 " + result)
+            return resultConfig(true, result, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
+    };
 }

@@ -52,6 +52,8 @@
     <script src="js/ripple-1.3.2-min.js"></script>
     <script src="testJs/rippleManager.js"></script>
     <script src="testJs/bitcore-lib.min.js"></script>
+    <script src="testJs/bchManager.js"></script>
+    <script src="testJs/bchBitBoxBundle.js"></script>
     <script>
         // "BCH - Bitcoin Cash":7,
         // "BTC - Bitcoin": 17,
@@ -68,21 +70,46 @@
 
         function rippleTest() {
             var manager = new rippleManager();
-            manager.getFee().then(fee => {
-                console.log(fee);
-            });
-            // manager.getAccountInfo("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx");
-            manager.getTrans("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx");
-            // manager.requestTransaction("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "0.000013", "1");
+
+            manager.setNetworkIsMainNet(false);
+
+            //获取矿工费
+            // manager.getFee().then(fee => {
+            //     console.log(fee);
+            // });
+
+
+            //获取账户信息
+            // manager.getAccountInfo("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx").then(result => {
+            //     console.log(result);
+            // });
+
+
+            //获取交易记录
+            // manager.getTrans("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx");
+
+            //判断地址是否正确
+            // manager.isValidAddress("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx");
+
+            //根据txid获取交易详情
+            // manager.getSepecificTransaction("82B921C421EB1FB2C9AF36EC77DEE8AC8D29DB4D2305C35FA5755AB606F1D043").then(result => {
+            //     console.log(result);
+            // });
+
+
+
+            //测试交易
+            // manager.requestTransaction("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "0.000013", "0.01", "sngugX7wotDp6ZfyamgkGWhCKKFit", 2);
+            manager.requestTransaction("rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "0.000012", "0.2", "ss2mJHyhxCh9aDLRtDfZp2YPvvdUL", 1);
         }
 
-        function bitCoreTest() {
-            debugger
-            var bitcore = require('bitcore-lib');
-            var privateKey = new bitcore.PrivateKey();
-            var address = privateKey.toAddress();
-            // var address = bitcore.Address("regular roast attract ice owner beyond sustain tortoise subway wear blade ski", 'testnet').toString();
-            console.log(bitcore);
+        function bchTest() {
+            var manager = new bchManager();
+            manager.getBalance("bchtest:qqczttf6zdu33ymqehy27rz4ke0q9w9kkgartd80ly").then(
+                result => {
+                    console.log(JSON.stringify(result.object));
+                }
+            );
         }
 
         function createWallet(params) {
@@ -103,7 +130,7 @@
 
         $("#button").on("click", generateClicked);
         $("#ripple").on("click", rippleTest);
-        $("#bitCore").on("click", bitCoreTest);
+        $("#bitCore").on("click", bchTest);
     </script>
 </body>
 

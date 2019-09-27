@@ -1,0 +1,1 @@
+let BITBOX = require('bitbox-sdk').BITBOX;

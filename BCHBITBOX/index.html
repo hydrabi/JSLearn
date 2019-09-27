@@ -6,18 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="bundle.js"></script>
+    <script src="bchManager.js"></script>
+    <script src="bchBitBoxBundle.js"></script>
 </head>
 
 <body>
     <script>
-        const p1 = new Promise(function(resolve, reject) {
-            resolve('success1');
-        });
-
-        p1.then(function(value) {
-            console.log(value);
-        });
+        var manager = new bchManager();
+        manager.getBalance("bchtest:qqczttf6zdu33ymqehy27rz4ke0q9w9kkgartd80ly").then(
+            result => {
+                console.log(JSON.stringify(result.object));
+            }
+        );
     </script>
 </body>
 
