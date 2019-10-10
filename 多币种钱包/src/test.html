@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*" />
     <title>Document</title>
 </head>
 
@@ -192,8 +193,36 @@
         function liteCoinTest() {
             let litecore = require("litecore-lib");
             var privateKey = new litecore.PrivateKey();
-            var address = privateKey.toAddress();
-            console.log(address);
+            let wif = privateKey.toWIF();
+            console.log(wif);
+
+            let privateKey2 = new litecore.PrivateKey(wif);
+            let wif2 = privateKey2.toWIF();
+            console.log(wif2);
+
+            var address = privateKey.toAddress("testnet");
+            let addressStr = address.toString();
+            console.log(addressStr);
+
+            let publicKey = privateKey.toPublicKey();
+            let publickKeyString = publicKey.toString();
+            console.log(publickKeyString);
+
+            // $.get("https://chain.so/api/v2/get_address_balance/LTCTEST/mwmKih47dV9HhHAVXaaedqYWqWyDy9nwpe", function(data, status) {
+            //     console.log("状态是 " + status + "结果是 " + data);
+            // });
+            // $.getJSON("https://chain.so/api/v2/get_address_balance/LTCTEST/mwmKih47dV9HhHAVXaaedqYWqWyDy9nwpe", function(data, status) {
+            //     console.log("状态是 " + status + "结果是 " + data);
+            // });
+
+            $.ajax({
+                url: "http://localhost:3001/insight-lite-api/block-index/0",
+                type: "get",
+                dataType: "jsonp", //指定服务器返回的数据类型
+                success: function(data) {
+                    console.log(data);
+                }
+            });
         }
 
         function createWallet(params) {

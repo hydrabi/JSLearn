@@ -57,3 +57,5 @@ console.log(`最大数${Number.MAX_VALUE}`);
 let max = Number.MAX_VALUE + Number.MAX_VALUE;
 //判断是否能参与计算
 console.log(`${max}是否是有穷的${isFinite(max)}`);
+
+//NaN 本来要返回数值的操作数未返回数值

@@ -1,8 +1,0 @@
-{
-    "name": "Your app name",
-    "version": "0.0.1",
-    "license": "MIT",
-    "dependencies": {
-        "litecore-lib": "^v0.12.6"
-    }
-}

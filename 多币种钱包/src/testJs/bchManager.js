@@ -388,8 +388,10 @@ var bchManager = function() {
 
         //计算最小的矿工费 单位为聪
         let minMinerFeeSatoshis = bitbox.BitcoinCash.getByteCount({ P2PKH: unSpentArr.length }, { P2PKH: 2 });
+        console.log("计算到的矿工费为：" + minMinerFeeSatoshis);
         //真正使用的矿工费
         let realMinerFeeSatoshis = bitbox.BitcoinCash.toSatoshi(minerFee);
+        console.log("传进来的矿工费为：" + realMinerFeeSatoshis);
         if (realMinerFeeSatoshis < minMinerFeeSatoshis) {
             realMinerFeeSatoshis = minMinerFeeSatoshis;
         }
