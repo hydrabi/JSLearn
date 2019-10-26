@@ -24,20 +24,27 @@ var rippleManager = function() {
         };
     }
 
+    //设置主链
     this.setNetworkIsMainNet = function(isMainNet) {
-        if (isMainNet) {
-            api = new ripple.RippleAPI({
-                //正式链
-                server: 'wss://s1.ripple.com/'
-            });
-        } else {
-            api = new ripple.RippleAPI({
-                // server: 'wss://s1.ripple.com/'
-                //测试链
-                server: 'wss://s.altnet.rippletest.net:51233'
-            });
+        try {
+            if (isMainNet) {
+                api = new ripple.RippleAPI({
+                    //正式链
+                    server: 'wss://s1.ripple.com/'
+                });
+            } else {
+                api = new ripple.RippleAPI({
+                    // server: 'wss://s1.ripple.com/'
+                    //测试链
+                    server: 'wss://s.altnet.rippletest.net:51233'
+                });
+
+                console.log(`api is ${JSON.stringify(api)}`);
+            }
+            return resultConfig(true, "设置成功", "");
+        } catch (err) {
+            return resultConfig(false, "设置失败", "");
         }
-        return resultConfig(true, "设置成功", "");
     }
 
     // 获取用户信息
@@ -188,4 +195,33 @@ var rippleManager = function() {
             return resultConfig(false, "", err.message);
         }
     };
+
+    //根据私钥获取地址
+    this.deriveAddress = async function(seed) {
+        await api.connect();
+        try {
+            let keypair = api.deriveKeypair(seed);
+            var public_key = keypair.publicKey;
+            var private_key = keypair.privateKey;
+            console.log(`公钥为： ${public_key},私钥为${private_key}`)
+            var address = api.deriveAddress(public_key);
+            console.log(`地址为：${address}`);
+            return resultConfig(true, address, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
+    }
+
+    //判断私钥是否有效
+    this.isValidSecret = async function(secret) {
+        await api.connect();
+        try {
+            let isValid = api.isValidSecret(secret);
+            return resultConfig(true, isValid, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
+    }
 }

@@ -57,6 +57,7 @@
     <script src="testJs/bchManager.js"></script>
     <script src="testJs/bchBitBoxBundle.js"></script>
     <script src="testJs/litecore-lib.min.js"></script>
+    <script src="testJs/liteCoinManager.js"></script>
     <script>
         // "BCH - Bitcoin Cash":7,
         // "BTC - Bitcoin": 17,
@@ -90,7 +91,10 @@
 
 
             //获取交易记录
-            manager.getTrans(address, 3, 757699);
+            // manager.getTrans(address, 3, 0);
+
+            //根据secret获取地址
+            manager.deriveAddress("sngugX7wotDp6ZfyamgkGWhCKKFit")
 
             //判断地址是否正确
             // manager.isValidAddress(address);
@@ -192,37 +196,43 @@
 
         function liteCoinTest() {
             let litecore = require("litecore-lib");
-            var privateKey = new litecore.PrivateKey();
+            var privateKey = new litecore.PrivateKey("testnet");
             let wif = privateKey.toWIF();
             console.log(wif);
-
-            let privateKey2 = new litecore.PrivateKey(wif);
-            let wif2 = privateKey2.toWIF();
-            console.log(wif2);
 
             var address = privateKey.toAddress("testnet");
             let addressStr = address.toString();
             console.log(addressStr);
 
-            let publicKey = privateKey.toPublicKey();
-            let publickKeyString = publicKey.toString();
-            console.log(publickKeyString);
+            // var privateKey = new litecore.PrivateKey();
+            // let wif = privateKey.toWIF();
+            // console.log(wif);
 
-            // $.get("https://chain.so/api/v2/get_address_balance/LTCTEST/mwmKih47dV9HhHAVXaaedqYWqWyDy9nwpe", function(data, status) {
-            //     console.log("状态是 " + status + "结果是 " + data);
-            // });
-            // $.getJSON("https://chain.so/api/v2/get_address_balance/LTCTEST/mwmKih47dV9HhHAVXaaedqYWqWyDy9nwpe", function(data, status) {
-            //     console.log("状态是 " + status + "结果是 " + data);
-            // });
+            // let privateKey2 = new litecore.PrivateKey(wif);
+            // let wif2 = privateKey2.toWIF();
+            // console.log(wif2);
 
-            $.ajax({
-                url: "http://localhost:3001/insight-lite-api/block-index/0",
-                type: "get",
-                dataType: "jsonp", //指定服务器返回的数据类型
-                success: function(data) {
-                    console.log(data);
-                }
-            });
+            // var address = privateKey.toAddress("testnet");
+            // let addressStr = address.toString();
+            // console.log(addressStr);
+
+            // var mainAddress = privateKey.toAddress("mainnet")
+            // let mainAddressStr = mainAddress.toString();
+            // console.log(mainAddressStr);
+
+            // let publicKey = privateKey.toPublicKey();
+            // let publickKeyString = publicKey.toString();
+            // console.log(publickKeyString);
+
+            // var manager = new liteCoinManager();
+            // let address = manager.getAddressFromWif("T35kTom9ogSqHFx6jgxQmc8xVPECpfTYdgyWUnmirdAkK5At9TZw");
+            // console.log(`address is ${address.object}`);
+
+            // let wifIsValid = manager.isWifValid("T35kTom9ogSqHFx6jgxQmc8xVPECpfTYdgyWUnmirdAkK5At9TZw");
+            // console.log(`wif Valid ${wifIsValid.object}`);
+
+            // let addressIsValid = manager.isAddressValid("mwmKih47dV9HhHAVXaaedqYWqWyDy9n");
+            // console.log(`address Valid ${addressIsValid.object}`);
         }
 
         function createWallet(params) {

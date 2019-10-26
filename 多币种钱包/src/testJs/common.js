@@ -44,6 +44,23 @@ setupWebViewJavascriptBridge(function(bridge) {
         responseCallback(manager.address(words, pass, coinType));
     });
 
+    // 获取地址 公钥 私钥
+    bridge.registerHandler('getMneAndInfo', function(data, responseCallback) {
+        var coinType = data.coinType
+        var manager = new WalletCreateManager();
+        var words = manager.generate();
+        var addressObj = manager.address(words, "", coinType);
+        var result = {
+            "words": words,
+            "address": addressObj["address"],
+            "pubkey": addressObj["pubkey"],
+            "privkey": addressObj["privkey"]
+        }
+        responseCallback(manager.address(words, result, coinType));
+    });
+
+
+
     /////////////////////////////////////////////////////////////// 瑞波XRP //////////////////////////////////////////
     // 获取瑞波的矿工费
     bridge.registerHandler('getRippleFee', function(data, responseCallback) {
@@ -118,7 +135,24 @@ setupWebViewJavascriptBridge(function(bridge) {
         var isMainNet = data.isMainNet;
 
         var manager = new rippleManager();
-        manager.setNetworkIsMainNet(isMainNet).then(resultObj => {
+        manager.setNetworkIsMainNet(isMainNet);
+        responseCallback(resultObj);
+    });
+
+    //通过密钥生成地址
+    bridge.registerHandler('rippleDeriveAddress', function(data, responseCallback) {
+        var secret = data.secret;
+        var manager = new rippleManager();
+        manager.deriveAddress(secret).then(resultObj => {
+            responseCallback(resultObj);
+        });
+    });
+
+    //判断密钥是否有效
+    bridge.registerHandler('rippleSecretIsValid', function(data, responseCallback) {
+        var secret = data.secret;
+        var manager = new rippleManager();
+        manager.isValidSecret(secret).then(resultObj => {
             responseCallback(resultObj);
         });
     });
@@ -242,4 +276,43 @@ setupWebViewJavascriptBridge(function(bridge) {
         });
     });
 
+    /////////////////////////////////////////////////// LTC //////////////////////////////////////////
+
+    //设置是否主链
+    bridge.registerHandler('ltcSetNetworkIsMainNet', function(data, responseCallback) {
+        let isMainNet = data.isMainNet;
+
+        let manager = new liteCoinManager();
+        let resultObj = manager.setNetworkIsMainNet(isMainNet)
+        responseCallback(resultObj);
+
+    });
+
+    //根据私钥获取地址
+    bridge.registerHandler('ltcGetAddressFromWif', function(data, responseCallback) {
+        let wif = data.wif;
+
+        let manager = new liteCoinManager();
+        let resultObj = manager.getAddressFromWif(wif)
+        responseCallback(resultObj);
+
+    });
+
+    //判断私钥是否有效
+    bridge.registerHandler('ltcIsWifValid', function(data, responseCallback) {
+        let wif = data.wif;
+
+        let manager = new liteCoinManager();
+        let resultObj = manager.isWifValid(wif)
+        responseCallback(resultObj);
+    });
+
+    //判断地址是否有效
+    bridge.registerHandler('ltcIsAddressValid', function(data, responseCallback) {
+        let address = data.address;
+
+        let manager = new liteCoinManager();
+        let resultObj = manager.isAddressValid(address)
+        responseCallback(resultObj);
+    });
 })
