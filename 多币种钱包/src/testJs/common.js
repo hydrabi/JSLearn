@@ -96,6 +96,23 @@ setupWebViewJavascriptBridge(function(bridge) {
         });
     });
 
+    // 瑞波的交易 fromAddress, toAddress, fee, amount,priKey,pubKey 返回 {"result":true,"object":tx}
+    bridge.registerHandler('rippleTranscationWithKeypair', function(data, responseCallback) {
+        var fromAddress = data.fromAddress;
+        var toAddress = data.toAddress;
+        var fee = data.fee;
+        var amount = data.amount;
+        var priKey = data.priKey;
+        var pubKey = data.pubKey;
+        var tag = data.tag;
+
+        var manager = new rippleManager();
+        manager.requestTransactionWithKeyPair(fromAddress, toAddress, fee, amount, priKey, pubKey, tag).then(resultObj => {
+            responseCallback(resultObj);
+        });
+    });
+
+
     // 瑞波的交易记录
     bridge.registerHandler('getRippleTrans', function(data, responseCallback) {
         var address = data.address;

@@ -69,7 +69,7 @@
         function generateClicked() {
             var manager = new WalletCreateManager();
             var words = manager.generate();
-            manager.address("under syrup oak method must enrich buyer sister cherry rural obvious kit", "", "BCH - Bitcoin Cash");
+            manager.address("under syrup oak method must enrich buyer sister cherry rural obvious kit", "", "XRP - Ripple");
         }
 
         function rippleTest() {
@@ -94,7 +94,7 @@
             // manager.getTrans(address, 3, 0);
 
             //根据secret获取地址
-            manager.deriveAddress("sngugX7wotDp6ZfyamgkGWhCKKFit")
+            // manager.deriveAddress("sngugX7wotDp6ZfyamgkGWhCKKFit")
 
             //判断地址是否正确
             // manager.isValidAddress(address);
@@ -106,7 +106,9 @@
 
             //测试交易
             // manager.requestTransaction("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "0.000013", "0.01", "sngugX7wotDp6ZfyamgkGWhCKKFit", 2);
-            // manager.requestTransaction("rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "0.000012", "0.2", "ss2mJHyhxCh9aDLRtDfZp2YPvvdUL", 1);
+            // manager.requestTransaction("rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "0.000012", "0.03", "ss2mJHyhxCh9aDLRtDfZp2YPvvdUL", 1);
+            // manager.requestTransactionWithKeyPair("rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "0.000012", "0.01", "00428AE233CDEE1654D4B2B60E90FC9490C04E707B8104160960F9E090A13F4D51", "03CF65A4C7FDF9E324BFCE41318071F3B133ECC70956B746F62F9C14192687DCEA", 1);
+            manager.requestTransactionWithKeyPair("rJqGsa3Dd5PC8fAcZGzia6BJjk383UBUtx", "rswdUBJwu1dug8zTKmVS7fWGMvyoFMd2fH", "0.000012", "0.01", "005F34B3034B0B18DCB085BA874B2ED6C47D63AC14E9E58C2A3674DC7EEDD4EEBF", "033D534D10676D46D2FBA81BF4EC86719B2D8C47EDD798D26DE63BEEBF9715E63C", 10);
         }
 
         function bchTest() {

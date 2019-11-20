@@ -1,6 +1,5 @@
 var rippleManager = function() {
 
-    console.log(ripple);
     var api = new ripple.RippleAPI({
         // server: 'wss://s1.ripple.com/'
         //测试链
@@ -34,7 +33,6 @@ var rippleManager = function() {
                 });
             } else {
                 api = new ripple.RippleAPI({
-                    // server: 'wss://s1.ripple.com/'
                     //测试链
                     server: 'wss://s.altnet.rippletest.net:51233'
                 });
@@ -115,24 +113,50 @@ var rippleManager = function() {
             console.log(err.message);
             return resultConfig(false, "", err.message);
         }
+    }
 
+    //通过keypair转账
+    this.requestTransactionWithKeyPair = async function(fromAddress, toAddress, fee, amount, priKey, pubKey, tag = 0) {
 
-        //确认最新的有效版本号
-        // api.on('ledger', ledger => {
-        //     console.log("Ledger version", ledger.ledgerVersion, "was just validated.");
-        //     if (ledger.ledgerVersion > maxLedgerVersion) {
-        //         console.log("If the transaction hasn't succeeded by now, it's expired");
-        //     }
-        // });
+        await api.connect();
+        const ledger = await api.getLedger();
+        //最后总账序列 是所有交易的可选参数。这指示Radar网络，截至具体总账实例，交易必须被验证。交易将永远不会被纳入一个有更大序列号的总账实例。
+        const lastLedgerSequence = ledger.ledgerVersion + 4;
 
-        // console.log("Prepared transaction instructions:", preparedTx.txJSON);
-        // console.log("Transaction cost:", preparedTx.instructions.fee, "XRP");
-        // console.log("Transaction expires after ledger:", preparedTx.instructions.maxLedgerVersion);
-        // console.log("Identifying hash:", response.id);
-        // console.log("Signed blob:", txBlob);
-        // console.log("Tentative result code:", result.resultCode);
-        // console.log("Tentative result message:", result.resultMessage);
+        const transaction = {
+            "TransactionType": "Payment",
+            "Account": fromAddress,
+            "Amount": api.xrpToDrops(amount), // Same as "Amount": "22000000"
+            "Destination": toAddress,
+            "LastLedgerSequence": lastLedgerSequence,
+            "SourceTag": parseInt(tag)
+        };
 
+        const instructions = {
+            "fee": fee,
+        };
+
+        //准备transcation
+        const preparedTx = await api.prepareTransaction(transaction, instructions);
+        //最大总账版本号
+        const maxLedgerVersion = preparedTx.instructions.maxLedgerVersion;
+        const txJson = preparedTx.txJSON;
+        const keypair = { privateKey: priKey, publicKey: pubKey };
+        //获取签名
+        const response = api.sign(txJson, keypair);
+        //最后交易的签名
+        const txBlob = response.signedTransaction;
+        //交易id
+        const txID = response.id;
+
+        //提交的结果
+        try {
+            const result = await api.submit(txBlob);
+            return resultConfig(true, txID, "");
+        } catch (err) {
+            console.log(err.message);
+            return resultConfig(false, "", err.message);
+        }
     }
 
     function getMaxLedgerVersion() {
@@ -206,7 +230,8 @@ var rippleManager = function() {
             console.log(`公钥为： ${public_key},私钥为${private_key}`)
             var address = api.deriveAddress(public_key);
             console.log(`地址为：${address}`);
-            return resultConfig(true, address, "");
+            const result = { "address": address, "pubkey": public_key, "privkey": private_key }
+            return resultConfig(true, result, "");
         } catch (err) {
             console.log(err.message);
             return resultConfig(false, "", err.message);
@@ -222,6 +247,15 @@ var rippleManager = function() {
         } catch (err) {
             console.log(err.message);
             return resultConfig(false, "", err.message);
+        }
+    }
+
+    this.getScrect = async function(men) {
+        await api.connect();
+        try {
+            api
+        } catch (err) {
+
         }
     }
 }
